@@ -176,3 +176,24 @@ html {
   transition: transform 0.3s ease;
 }
 .service-card:hover .service-card-bar { transform: scaleX(1); }
+
+/* ── Gallery Section Mobile Repairs ── */
+@media (max-width: 900px) {
+  #gallery .slide-item { min-width: 50% !important; height: 200px !important; }
+  #gallery > div:first-child { padding: 0 24px 32px !important; }
+  #gallery > div:last-child { padding: 16px 24px !important; }
+}
+
+/* ── Packages Section Mobile Repairs ── */
+@media (max-width: 900px) {
+  #packages { padding: 80px 24px !important; }
+  #packages > div:first-child { grid-template-columns: 1fr !important; }
+  #packages > div:nth-child(2) { grid-template-columns: repeat(2,1fr) !important; }
+  #packages > div:last-child { grid-template-columns: 1fr !important; }
+}
+
+/* ── Contact Section Mobile Repairs ── */
+@media (max-width: 900px) {
+  #contact { padding: 80px 24px !important; }
+  #contact > div:last-child { grid-template-columns: 1fr !important; }
+}

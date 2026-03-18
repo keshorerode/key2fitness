@@ -19,53 +19,55 @@ export default function GallerySection({ data }: { data: CMSData }) {
 
   return (
     <section id="gallery" style={{ background: 'var(--black)', padding: '80px 0 0' }}>
-      {/* Header */}
-      <motion.div
-        ref={ref}
-        initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.7 }}
-        style={{ padding: '0 60px 40px' }}
-      >
-        <span className="eyebrow">INSIDE THE GYM</span>
-        <div className="section-title" style={{ marginTop: 10 }}>
-          OUR <span style={{ color: 'var(--tan)' }}>FACILITY</span>
-        </div>
-      </motion.div>
+      <div style={{ padding: '0 60px 40px' }}>
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7 }}
+        >
+          <span className="eyebrow">INSIDE THE GYM</span>
+          <div className="section-title" style={{ marginTop: 10 }}>
+            OUR <span style={{ color: 'var(--tan)' }}>FACILITY</span>
+          </div>
+        </motion.div>
+      </div>
 
-      {/* Slider */}
-      <div style={{ overflow: 'hidden', position: 'relative' }}>
+      {data.gallery.length === 0 ? (
         <div style={{
-          display: 'flex',
-          transform: `translateX(-${offset * (100 / visibleCount)}%)`,
-          transition: 'transform 0.6s cubic-bezier(0.77,0,0.18,1)',
+          padding: '60px', textAlign: 'center', margin: '0 60px',
+          border: '1px dashed var(--border)', color: 'var(--muted)',
+          fontFamily: 'var(--font-barlow-condensed)', letterSpacing: '0.1em',
         }}>
-          {data.gallery.map((url, i) => (
-            <GallerySlide key={i} url={url} index={i} inView={inView} />
-          ))}
+          NO PHOTOS ADDED YET. UPLOAD PHOTOS IN THE ADMIN DASHBOARD.
         </div>
-      </div>
+      ) : (
+        <>
+          <div style={{ overflow: 'hidden', position: 'relative' }}>
+            <div style={{
+              display: 'flex',
+              transform: `translateX(-${offset * (100 / visibleCount)}%)`,
+              transition: 'transform 0.6s cubic-bezier(0.77,0,0.18,1)',
+            }}>
+              {data.gallery.map((url, i) => (
+                <GallerySlide key={i} url={url} index={i} inView={inView} />
+              ))}
+            </div>
+          </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 60px' }}>
-        <SliderBtn onClick={prev} disabled={slideIndex === 0}>←</SliderBtn>
-        <SliderBtn onClick={next} disabled={slideIndex >= maxIndex}>→</SliderBtn>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {Array.from({ length: dotCount }).map((_, i) => (
-            <button key={i} onClick={() => setSlideIndex(i * visibleCount)}
-              className={`dot ${Math.floor(offset / visibleCount) === i ? 'active' : ''}`}
-              style={{ border: 'none', cursor: 'pointer', padding: 0 }}
-            />
-          ))}
-        </div>
-      </div>
-
-      <style>{`
-        @media (max-width: 900px) {
-          #gallery .slide-item { min-width: 50% !important; height: 200px !important; }
-          #gallery > div:first-child { padding: 0 24px 32px !important; }
-          #gallery > div:last-child { padding: 16px 24px !important; }
-        }
-      `}</style>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 60px' }}>
+            <SliderBtn onClick={prev} disabled={slideIndex === 0}>←</SliderBtn>
+            <SliderBtn onClick={next} disabled={slideIndex >= maxIndex}>→</SliderBtn>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {Array.from({ length: dotCount }).map((_, i) => (
+                <button key={i} onClick={() => setSlideIndex(i * visibleCount)}
+                  className={`dot ${Math.floor(offset / visibleCount) === i ? 'active' : ''}`}
+                  style={{ border: 'none', cursor: 'pointer', padding: 0 }}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   )
 }

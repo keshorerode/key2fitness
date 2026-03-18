@@ -80,12 +80,6 @@ export default function ContactSection({ data }: { data: CMSData }) {
         </motion.div>
       </div>
 
-      <style>{`
-        @media (max-width: 900px) {
-          #contact { padding: 80px 24px !important; }
-          #contact > div:last-child { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </section>
   )
 }

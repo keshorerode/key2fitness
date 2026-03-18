@@ -63,14 +63,6 @@ export default function PackagesSection({ data }: { data: CMSData }) {
         />
       </div>
 
-      <style>{`
-        @media (max-width: 900px) {
-          #packages { padding: 80px 24px !important; }
-          #packages > div:first-child { grid-template-columns: 1fr !important; }
-          #packages > div:nth-child(2) { grid-template-columns: repeat(2,1fr) !important; }
-          #packages > div:last-child { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </section>
   )
 }
