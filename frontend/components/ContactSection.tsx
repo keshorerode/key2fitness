@@ -96,7 +96,18 @@ export default function ContactSection({ data }: { data: CMSData }) {
               ))}
             </div>
           </motion.div>
-          <a href="tel:7798428238" className="btn-fill" style={{ marginTop: 12, alignSelf: 'flex-start' }}>CALL TO JOIN</a>
+          {(() => {
+            const sanitizedPhone = data.ph?.replace(/\s/g, '');
+            return sanitizedPhone ? (
+              <a href={`tel:${sanitizedPhone}`} className="btn-fill" style={{ marginTop: 12, alignSelf: 'flex-start' }}>
+                CALL TO JOIN
+              </a>
+            ) : (
+              <span className="btn-fill" style={{ marginTop: 12, alignSelf: 'flex-start', opacity: 0.5, cursor: 'not-allowed' }} aria-disabled="true">
+                CALL TO JOIN
+              </span>
+            );
+          })()}
         </div>
 
         {/* Right: Map + QR + Form */}

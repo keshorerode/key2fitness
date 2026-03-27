@@ -24,8 +24,11 @@ export default function PackagesSection({ data }: { data: CMSData }) {
         </p>
       </motion.div>
 
-      {/* Pricing cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${data.membershipPlans?.length || 1}, 1fr)`, gap: 24, marginBottom: 40, paddingTop: 40 }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+        gap: 24, marginBottom: 40, paddingTop: 40 
+      }}>
         {data.membershipPlans?.map((plan, i) => (
           <PriceCard key={plan.id} plan={plan} data={data} index={i} inView={inView} />
         ))}
@@ -53,14 +56,15 @@ function PriceCard({ plan, data, index, inView }: {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.1, duration: 0.6 }}
+      initial={{ opacity: 0, scale: 0.95, y: 30 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.5, type: 'spring', damping: 15 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative',
-        transform: hovered ? 'translateY(-6px)' : 'none',
-        transition: 'all 0.3s', cursor: 'pointer', zIndex: isFeatured ? 2 : 1,
+        cursor: 'pointer', zIndex: isFeatured ? 2 : 1,
         height: '100%'
       }}
     >
@@ -111,13 +115,17 @@ function PTCard({ title, subtitle, price, features, index, inView }: {
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: 0.6 + index * 0.1, duration: 0.6 }}
+      initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.6 + index * 0.15, duration: 0.7, ease: 'easeOut' }}
+      whileHover={{ scale: 1.01, boxShadow: '0 15px 40px rgba(0,0,0,0.3)' }}
       style={{
         background: 'var(--card)', padding: '48px 42px',
         borderLeft: '4px solid var(--tan)',
         display: 'flex', flexDirection: 'column', gap: 16,
-        clipPath: 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)'
+        clipPath: 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)',
+        transition: 'all 0.3s'
       }}
     >
       <div style={{ fontFamily: 'var(--font-bebas)', fontSize: '2.4rem', letterSpacing: '0.03em', lineHeight: 1 }}>{title}</div>

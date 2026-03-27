@@ -1,11 +1,14 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
 # next.js
-/.next/
+.next/
 /out/
+
+# vscode
+.vscode/
 
 # production
 /build
@@ -16,6 +19,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+firebase-adminsdk.json
 
 # misc
 .DS_Store

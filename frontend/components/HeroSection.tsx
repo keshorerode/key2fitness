@@ -90,8 +90,9 @@ export default function HeroSection({ data }: { data: CMSData }) {
             src={data.heroImage}
             alt="Male athlete"
             fill
-            style={{ objectFit: 'cover', objectPosition: 'center top', filter: 'brightness(0.48) saturate(0.55) contrast(1.15)' }}
+            style={{ objectFit: 'cover', objectPosition: 'center top', filter: 'brightness(0.75) saturate(0.85) contrast(1.15)' }}
             priority
+            unoptimized
             referrerPolicy="no-referrer"
           />
         </div>

@@ -26,7 +26,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-address" style={{ justifySelf: 'center', fontFamily: 'var(--font-barlow-condensed)', fontSize: '0.72rem', color: 'var(--muted)', letterSpacing: '0.1em', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-        <div>© 2025 The Key 2 Fitness Unisex Gym · Erode, TN</div>
+        <div>© {new Date().getFullYear()} The Key 2 Fitness Unisex Gym · Erode, TN</div>
         <a href="https://www.linkedin.com/in/keshorevm" target="_blank" rel="noopener noreferrer"
           style={{ color: 'rgba(240,236,228,0.3)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.15em', textDecoration: 'none', transition: 'color 0.2s' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--tan)')}

@@ -39,9 +39,13 @@ export default function TrainingSection({ data }: { data: CMSData }) {
 function TrainingCard({ card, index, inView }: { card: CMSData['training'][0]; index: number; inView: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.1, duration: 0.6 }}
+      initial={{ opacity: 0, scale: 0.9, y: 30 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2, type: 'tween' } }}
+      transition={{ delay: index * 0.1, duration: 0.5, type: 'spring', stiffness: 100 }}
       className="service-card"
+      style={{ position: 'relative' }}
     >
       {/* Top bar animation */}
       <div className="service-card-bar" />

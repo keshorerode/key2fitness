@@ -1,6 +1,6 @@
 # The Key 2 Fitness — Next.js Website
 
-Unisex gym website for The Key 2 Fitness, Tiruchirappalli.
+Unisex gym website for The Key 2 Fitness, Erode.
 
 ## Tech Stack
 - **Next.js 14** (App Router, TypeScript)
@@ -112,4 +112,4 @@ Change to your new password → save → redeploy.
 
 ---
 
-Built with ❤️ for The Key 2 Fitness, Tiruchirappalli.
+Built with ❤️ for The Key 2 Fitness, Erode.

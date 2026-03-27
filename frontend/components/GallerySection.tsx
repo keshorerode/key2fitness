@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Image from 'next/image'
 import { CMSData } from '@/lib/cms-data'
@@ -13,13 +13,7 @@ export default function GallerySection({ data }: { data: CMSData }) {
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  useEffect(() => {
-    checkScroll()
-    window.addEventListener('resize', checkScroll)
-    return () => window.removeEventListener('resize', checkScroll)
-  }, [data.gallery])
-
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     if (!scrollContainerRef.current) return
     const el = scrollContainerRef.current
     setCanScrollLeft(el.scrollLeft > 5)
@@ -29,7 +23,13 @@ export default function GallerySection({ data }: { data: CMSData }) {
     if (itemWidth > 0) {
       setActiveIndex(Math.round(el.scrollLeft / itemWidth))
     }
-  }
+  }, [scrollContainerRef])
+
+  useEffect(() => {
+    checkScroll()
+    window.addEventListener('resize', checkScroll)
+    return () => window.removeEventListener('resize', checkScroll)
+  }, [checkScroll, data.gallery.length])
 
   // Auto-slide logic
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function GallerySection({ data }: { data: CMSData }) {
             onTouchEnd={() => setIsPaused(false)}
           >
             {data.gallery.map((url, i) => (
-              <GallerySlide key={i} url={url} index={i} inView={inView} />
+              <GallerySlide key={url} url={url} index={i} inView={inView} />
             ))}
           </div>
 
@@ -156,6 +156,7 @@ function GallerySlide({ url, index, inView }: { url: string; index: number; inVi
             transition: 'filter 0.3s',
             pointerEvents: 'none', // Prevents image drag conflicts with scroll
           }}
+          unoptimized
           referrerPolicy="no-referrer"
         />
       </div>

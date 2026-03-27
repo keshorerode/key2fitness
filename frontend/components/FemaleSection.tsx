@@ -28,7 +28,8 @@ export default function FemaleSection({ data }: { data: CMSData }) {
             src={data.femaleImage}
             alt="Female athlete training"
             fill
-            style={{ objectFit: 'cover', objectPosition: 'center top', filter: 'brightness(0.5) saturate(0.6) contrast(1.1)' }}
+            style={{ objectFit: 'cover', objectPosition: 'center top', filter: 'brightness(0.75) saturate(0.85) contrast(1.1) ' }}
+            unoptimized
             referrerPolicy="no-referrer"
           />
         </div>

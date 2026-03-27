@@ -125,7 +125,7 @@ export const defaultData: CMSData = {
   femaleImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=85&auto=format&fit=crop',
 }
 
-const API_URL = 'http://localhost:5000/api/cms'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/cms'
 
 export async function fetchCMSData(): Promise<CMSData> {
   try {
@@ -138,11 +138,14 @@ export async function fetchCMSData(): Promise<CMSData> {
   }
 }
 
-export async function updateCMSData(data: CMSData): Promise<boolean> {
+export async function updateCMSData(data: Partial<CMSData>, password?: string): Promise<boolean> {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(password ? { 'x-admin-password': password } : {})
+      },
       body: JSON.stringify(data),
     })
     return res.ok

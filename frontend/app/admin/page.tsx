@@ -1,16 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react'
 import { fetchCMSData, updateCMSData, defaultData, CMSData } from '@/lib/cms-data'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import BrandLogo from '@/components/BrandLogo'
 
-const getExpectedPassword = () => {
-  const d = new Date()
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const yyyy = d.getFullYear()
-  return `key2fitness${dd}${mm}${yyyy}`
-}
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'key2fit2026'
 
 type Tab = 'hero' | 'female' | 'training' | 'prices' | 'contact' | 'gallery'
 
@@ -36,6 +30,19 @@ export default function AdminPage() {
   const [saveFlash, setSaveFlash] = useState(false)
   const [newUrl, setNewUrl]     = useState('')
   const [history, setHistory]   = useState<CMSData[]>([])
+  const [focusOverlay, setFocusOverlay] = useState<{ label: string; value: string; onChange: (v: string) => void; type: 'input' | 'textarea' } | null>(null)
+
+  const isMobile = useCallback(() => typeof window !== 'undefined' && window.innerWidth <= 900, [])
+
+  const openFocusOverlay = useCallback((label: string, value: string, onChange: (v: string) => void, type: 'input' | 'textarea' = 'input') => {
+    if (isMobile()) {
+      setFocusOverlay({ label, value, onChange, type })
+    }
+  }, [isMobile])
+
+  const closeFocusOverlay = useCallback(() => {
+    setFocusOverlay(null)
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -54,7 +61,7 @@ export default function AdminPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  })
+  }, [data, history])
 
   const pushToHistory = (oldData: CMSData) => {
     setHistory(prev => [oldData, ...prev].slice(0, 50))
@@ -70,7 +77,7 @@ export default function AdminPage() {
   }
 
   const login = () => {
-    if (pw === getExpectedPassword()) { setAuthed(true); setError('') }
+    if (pw === ADMIN_PASSWORD) { setAuthed(true); setError('') }
     else {
       setShake(true); setError('Incorrect password.')
       setPw(''); setTimeout(() => setShake(false), 500)
@@ -90,48 +97,48 @@ export default function AdminPage() {
   }
 
   const updateQuote = (i: number, val: string) => {
+    pushToHistory(data)
     const q = [...data.extraQuotes]
     q[i] = val
     setData(prev => ({ ...prev, extraQuotes: q }))
-    setSaved(false)
   }
 
   const addQuote = () => {
+    pushToHistory(data)
     setData(prev => ({ ...prev, extraQuotes: [...prev.extraQuotes, 'New quote...'] }))
-    setSaved(false)
   }
 
   const deleteQuote = (i: number) => {
+    pushToHistory(data)
     const q = [...data.extraQuotes]
     q.splice(i, 1)
     setData(prev => ({ ...prev, extraQuotes: q }))
-    setSaved(false)
   }
 
   const addPhoto = () => {
     if (!newUrl.trim()) return
+    pushToHistory(data)
     setData(prev => ({ ...prev, gallery: [...prev.gallery, newUrl.trim()] }))
     setNewUrl('')
-    setSaved(false)
   }
 
   const deletePhoto = (i: number) => {
+    pushToHistory(data)
     const g = [...data.gallery]
     g.splice(i, 1)
     setData(prev => ({ ...prev, gallery: g }))
-    setSaved(false)
   }
 
   const updateGalleryOrder = (newOrder: string[]) => {
+    pushToHistory(data)
     setData(prev => ({ ...prev, gallery: newOrder }))
-    setSaved(false)
   }
 
   const updateFemaleFeature = (i: number, val: string) => {
+    pushToHistory(data)
     const f = [...data.femaleFeatures]
     f[i] = val
     setData(prev => ({ ...prev, femaleFeatures: f }))
-    setSaved(false)
   }
 
   const addFemaleFeature = () => {
@@ -290,7 +297,7 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     setSaveFlash(true)
-    const success = await updateCMSData(data)
+    const success = await updateCMSData(data, pw)
     if (success) {
       setSaved(true)
       setTimeout(() => setSaveFlash(false), 2000)
@@ -302,6 +309,7 @@ export default function AdminPage() {
 
   // ── LOGIN SCREEN ──
   if (!authed) return (
+    <>
     <div style={{ minHeight: '100vh', background: 'var(--black)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="admin-login-wrap" style={{ width: '100%', maxWidth: 420, padding: 24 }}>
         <div style={{ marginBottom: 16 }}>
@@ -330,8 +338,25 @@ export default function AdminPage() {
               onKeyDown={e => e.key === 'Enter' && login()}
               placeholder="Enter admin password"
               autoFocus
-              style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '13px 44px 13px 14px', fontFamily: 'var(--font-barlow)', fontSize: '0.9rem', color: 'var(--white)', outline: 'none', borderRadius: 0, transition: 'border-color 0.2s' }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'var(--tan)')}
+              style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '13px 44px 13px 14px', fontFamily: 'var(--font-barlow)', fontSize: '16px', color: 'var(--white)', outline: 'none', borderRadius: 0, transition: 'border-color 0.2s' }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = 'var(--tan)'
+                if (typeof window !== 'undefined' && window.innerWidth <= 900) {
+                  // Clean up any existing proxy first
+                  document.getElementById('__kb_proxy')?.remove()
+                  const proxy = document.createElement('input')
+                  proxy.style.cssText = 'position:fixed;top:0;left:0;opacity:0;height:0;width:0;font-size:16px;'
+                  proxy.id = '__kb_proxy'
+                  document.body.appendChild(proxy)
+                  e.currentTarget.blur()
+                  proxy.focus()
+                  try {
+                    openFocusOverlay('Password', pw, (v) => setPw(v), 'input')
+                  } catch {
+                    proxy.remove()
+                  }
+                }
+              }}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
             />
             <button 
@@ -367,10 +392,15 @@ export default function AdminPage() {
         </motion.div>
       </div>
     </div>
+    <AnimatePresence>
+      {focusOverlay && <MobileFocusOverlay field={focusOverlay} onClose={closeFocusOverlay} />}
+    </AnimatePresence>
+    </>
   )
 
   // ── DASHBOARD ──
   return (
+    <FocusOverlayContext.Provider value={openFocusOverlay}>
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--black)' }}>
 
       {/* Topbar */}
@@ -461,6 +491,12 @@ export default function AdminPage() {
                   <GroupLabel>Hero Section Background Image</GroupLabel>
                   <Grid cols={1}>
                     <FieldCard label="Hero Image URL"><CInput value={data.heroImage} onChange={v => update('heroImage', v)} /></FieldCard>
+                    {data.heroImage && (
+                      <div style={{ marginTop: 12, border: '1px solid var(--border)', background: 'var(--card)', padding: 8, borderRadius: 4 }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.05em' }}>PREVIEW</div>
+                        <img src={data.heroImage} alt="Hero Preview" style={{ width: '100%', height: 'auto', maxHeight: 200, objectFit: 'contain', background: '#000' }} referrerPolicy="no-referrer" />
+                      </div>
+                    )}
                   </Grid>
                 </PanelWrap>
               )}
@@ -500,6 +536,12 @@ export default function AdminPage() {
                   <GroupLabel>Female Section Background Image</GroupLabel>
                   <Grid cols={1}>
                     <FieldCard label="Female Image URL"><CInput value={data.femaleImage} onChange={v => update('femaleImage', v)} /></FieldCard>
+                    {data.femaleImage && (
+                      <div style={{ marginTop: 12, border: '1px solid var(--border)', background: 'var(--card)', padding: 8, borderRadius: 4 }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.05em' }}>PREVIEW</div>
+                        <img src={data.femaleImage} alt="Female Preview" style={{ width: '100%', height: 'auto', maxHeight: 200, objectFit: 'contain', background: '#000' }} referrerPolicy="no-referrer" />
+                      </div>
+                    )}
                   </Grid>
                   <GroupLabel>Feature List</GroupLabel>
                   {data.femaleFeatures?.map((f, i) => (
@@ -781,6 +823,10 @@ export default function AdminPage() {
         </button>
       </div>
     </div>
+    <AnimatePresence>
+      {focusOverlay && <MobileFocusOverlay field={focusOverlay} onClose={closeFocusOverlay} />}
+    </AnimatePresence>
+    </FocusOverlayContext.Provider>
   )
 }
 
@@ -829,21 +875,55 @@ function FieldCard({ label, highlight, children }: { label: string; highlight?: 
   )
 }
 
-function CInput({ value, onChange, style }: { value: string; onChange: (v: string) => void; style?: React.CSSProperties }) {
+function CInput({ value, onChange, style, label }: { value: string; onChange: (v: string) => void; style?: React.CSSProperties; label?: string }) {
+  const ctx = useContext(FocusOverlayContext)
   return (
     <input value={value} onChange={e => onChange(e.target.value)}
-      style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '10px 12px', fontFamily: 'var(--font-barlow)', fontSize: '0.88rem', color: 'var(--white)', outline: 'none', borderRadius: 0, ...style }}
-      onFocus={e => (e.currentTarget.style.borderColor = 'var(--tan)')}
+      style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '10px 12px', fontFamily: 'var(--font-barlow)', fontSize: '16px', color: 'var(--white)', outline: 'none', borderRadius: 0, ...style }}
+      onFocus={e => {
+        e.currentTarget.style.borderColor = 'var(--tan)'
+        if (ctx && typeof window !== 'undefined' && window.innerWidth <= 900) {
+          document.getElementById('__kb_proxy')?.remove()
+          const proxy = document.createElement('input')
+          proxy.style.cssText = 'position:fixed;top:0;left:0;opacity:0;height:0;width:0;font-size:16px;'
+          proxy.id = '__kb_proxy'
+          document.body.appendChild(proxy)
+          e.currentTarget.blur()
+          proxy.focus()
+          try {
+            ctx(label || 'Edit Field', value, onChange, 'input')
+          } catch {
+            proxy.remove()
+          }
+        }
+      }}
       onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
     />
   )
 }
 
-function CTextarea({ value, onChange, rows = 3 }: { value: string; onChange: (v: string) => void; rows?: number }) {
+function CTextarea({ value, onChange, rows = 3, label }: { value: string; onChange: (v: string) => void; rows?: number; label?: string }) {
+  const ctx = useContext(FocusOverlayContext)
   return (
     <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows}
-      style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '10px 12px', fontFamily: 'var(--font-barlow)', fontSize: '0.88rem', color: 'var(--white)', outline: 'none', resize: 'vertical', borderRadius: 0 }}
-      onFocus={e => (e.currentTarget.style.borderColor = 'var(--tan)')}
+      style={{ width: '100%', background: 'var(--dark)', border: '1px solid var(--border)', padding: '10px 12px', fontFamily: 'var(--font-barlow)', fontSize: '16px', color: 'var(--white)', outline: 'none', resize: 'vertical', borderRadius: 0 }}
+      onFocus={e => {
+        e.currentTarget.style.borderColor = 'var(--tan)'
+        if (ctx && typeof window !== 'undefined' && window.innerWidth <= 900) {
+          document.getElementById('__kb_proxy')?.remove()
+          const proxy = document.createElement('input')
+          proxy.style.cssText = 'position:fixed;top:0;left:0;opacity:0;height:0;width:0;font-size:16px;'
+          proxy.id = '__kb_proxy'
+          document.body.appendChild(proxy)
+          e.currentTarget.blur()
+          proxy.focus()
+          try {
+            ctx(label || 'Edit Field', value, onChange, 'textarea')
+          } catch {
+            proxy.remove()
+          }
+        }
+      }}
       onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
     />
   )
@@ -884,3 +964,115 @@ function GalleryThumb({ url, index, onDelete }: { url: string; index: number; on
     </Reorder.Item>
   )
 }
+
+/* ── Focus Overlay Context ── */
+const FocusOverlayContext = createContext<((label: string, value: string, onChange: (v: string) => void, type: 'input' | 'textarea') => void) | null>(null)
+
+function MobileFocusOverlay({ field, onClose }: {
+  field: { label: string; value: string; onChange: (v: string) => void; type: 'input' | 'textarea' };
+  onClose: () => void;
+}) {
+  const [localValue, setLocalValue] = useState(field.value)
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    setLocalValue(field.value)
+    // Transfer focus from proxy input to actual overlay input (keeps iOS keyboard alive)
+    const timer = window.setTimeout(() => {
+      inputRef.current?.focus()
+      // Remove keyboard proxy
+      const proxy = document.getElementById('__kb_proxy')
+      if (proxy) proxy.remove()
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [field])
+
+  const handleChange = (v: string) => {
+    setLocalValue(v)
+    field.onChange(v)
+  }
+
+  const handleDone = () => {
+    onClose()
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={handleDone}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
+        alignItems: 'center', padding: '60px 20px 20px',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 500,
+          background: 'var(--card)', border: '1px solid var(--tan)',
+          padding: '28px 24px',
+          clipPath: 'polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px)'
+        }}
+      >
+        {/* Label */}
+        <div style={{
+          fontFamily: 'var(--font-barlow-condensed)', fontSize: '0.85rem',
+          letterSpacing: '0.2em', color: 'var(--tan)', textTransform: 'uppercase',
+          marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10
+        }}>
+          <span style={{ display: 'inline-block', width: 24, height: 1, background: 'var(--tan)' }} />
+          {field.label}
+        </div>
+
+        {/* Input / Textarea */}
+        {field.type === 'textarea' ? (
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+            value={localValue}
+            onChange={e => handleChange(e.target.value)}
+            rows={6}
+            style={{
+              width: '100%', background: 'var(--dark)', border: '1px solid var(--border)',
+              padding: '16px', fontFamily: 'var(--font-barlow)', fontSize: '18px',
+              color: 'var(--white)', outline: 'none', resize: 'vertical', borderRadius: 0,
+              lineHeight: 1.6
+            }}
+          />
+        ) : (
+          <input
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            value={localValue}
+            onChange={e => handleChange(e.target.value)}
+            style={{
+              width: '100%', background: 'var(--dark)', border: '1px solid var(--border)',
+              padding: '16px', fontFamily: 'var(--font-barlow)', fontSize: '18px',
+              color: 'var(--white)', outline: 'none', borderRadius: 0,
+            }}
+          />
+        )}
+
+        {/* Done button */}
+        <button onClick={handleDone} style={{
+          marginTop: 20, width: '100%', background: 'var(--tan)', color: 'var(--black)',
+          border: 'none', padding: '14px', fontFamily: 'var(--font-bebas)', fontSize: '1.1rem',
+          letterSpacing: '0.12em', cursor: 'pointer',
+          clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)'
+        }}>
+          DONE ✓
+        </button>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+export { FocusOverlayContext }
