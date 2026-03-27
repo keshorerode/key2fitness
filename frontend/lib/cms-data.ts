@@ -1,0 +1,153 @@
+export interface TrainingCard {
+  icon: string
+  title: string
+  desc: string
+  tag: string
+}
+
+export interface CMSData {
+  // Hero
+  hl1: string; hl2: string; hl3: string
+  hsub: string; hq: string; hc: string
+  extraQuotes: string[]
+  // Female
+  fl1: string; fl2: string; fl3: string
+  fb: string
+  femaleStats: { num: string; label: string }[]
+  // Training
+  training: TrainingCard[]
+  // Prices
+  membershipPlans: { duration: string; label: string; price: string; id: string }[]
+  pFeatured: string
+  ptPackages: { id: string; title: string; subtitle: string; price: string; features: string[] }[]
+  // Contact
+  locations: { id: string; address: string; mapUrl: string }[]
+  ph: string; pay: string
+  openingHours: { day: string; time: string }[]
+  // Gallery
+  gallery: string[]
+  // Dynamic Features & Images
+  femaleFeatures: string[]
+  heroImage: string
+  femaleImage: string
+}
+
+export const defaultData: CMSData = {
+  hl1: 'FORGE', hl2: 'YOUR', hl3: 'BODY.',
+  hsub: 'Where Strength Meets Discipline',
+  hq: '"The body achieves what the mind believes. Every rep, every set, every drop of sweat is a step closer to the version of you that you\'ve always wanted to be."',
+  hc: '— The Key 2 Fitness',
+  extraQuotes: [
+    'Pain is temporary. Pride is forever.',
+    "Don't limit your challenges. Challenge your limits.",
+    'Your only competition is who you were yesterday.',
+  ],
+  fl1: 'SHE TRAINS.', fl2: 'SHE', fl3: 'TRANSFORMS.',
+  fb: 'At The Key 2 Fitness, women get a dedicated training experience — personalised programmes, expert coaches, and an environment built around your goals. Lose weight, build strength, and feel confident every single day.',
+  femaleStats: [
+    { num: '4kg', label: 'Min. Loss Per Month' },
+    { num: '10', label: 'Day Diet Update' },
+    { num: '6+', label: 'Training Types' },
+  ],
+  training: [
+    { icon: '🏋️', title: 'Core Workout Training', desc: 'Build a rock-solid foundation with targeted core exercises. Improve stability, posture and functional strength for every movement you make.', tag: 'Foundation' },
+    { icon: '🔥', title: 'CrossFit Training', desc: 'High-intensity functional movements that build conditioning, endurance and power. Constantly varied workouts — never boring, always effective.', tag: 'High Intensity' },
+    { icon: '⚡', title: 'Fat Reduction Training', desc: 'Minimum 4 kg weight loss guaranteed per month with our scientifically designed fat-burning programme combined with personalised diet plans.', tag: 'Guaranteed Results' },
+    { icon: '🥊', title: 'Boxing & Combat', desc: 'Release stress, build agility and improve full-body coordination with our boxing and combat training sessions. No experience needed.', tag: 'Combat Ready' },
+    { icon: '🚴', title: 'Cardio & Spin Cycling', desc: 'Treadmills, ellipticals and spin bikes. Boost cardiovascular health, burn calories fast and improve stamina with every session.', tag: 'Cardio Zone' },
+    { icon: '🥗', title: 'Diet Planning', desc: 'Personalised nutrition plans updated every 10 days based on your progress. Real food, real results — no crash diets, no starvation.', tag: 'Every 10 Days' },
+  ],
+  membershipPlans: [
+    { id: 'p1', duration: '1 Month',   label: 'per month',  price: '₹2,000' },
+    { id: 'p2', duration: '3 Months',  label: 'quarterly',  price: '₹4,000' },
+    { id: 'p3', duration: '7 Months',  label: 'half year+', price: '₹5,000' },
+    { id: 'p4', duration: '13 Months', label: 'annual',     price: '₹8,000' },
+    { id: 'p5', duration: '24 Months', label: '2 years',    price: '₹11,000' },
+  ],
+  pFeatured: 'p4',
+  ptPackages: [
+    {
+      id: 'pt1',
+      title: 'Personal Training',
+      subtitle: 'One-on-one coaching · Dedicated trainer',
+      price: '₹7,000',
+      features: [
+        'Fat reduction programme — 4kg/month guaranteed',
+        'Personalised diet updated every 10 days',
+        'Core & CrossFit sessions included',
+        'Full progress tracking by your trainer',
+        'Priority booking for all equipment'
+      ]
+    },
+    {
+      id: 'pt2',
+      title: 'Couple Package',
+      subtitle: 'Train Together · Save Together',
+      price: '₹14,000',
+      features: [
+        'Both partners get dedicated personal training',
+        'Individual diet plans for each person',
+        'Shared progress tracking dashboard',
+        'All Personal Training features included',
+        'Save ₹7,000 vs two individual plans'
+      ]
+    }
+  ],
+  locations: [
+    {
+      id: 'loc1',
+      address: 'The Key 2 Fitness Unisex Gym\nPerundurai Rd, Edayankattuvalasu, Erode',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.9765780318603!2d77.71004649999999!3d11.336421300000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f22dac77f93%3A0x2ce663e0a7d5a3ff!2sThe%20Key2fitness!5e0!3m2!1sen!2sin!4v1773759336469!5m2!1sen!2sin'
+    }
+  ],
+  ph: '77984 28238 · 7708428231',
+  openingHours: [
+    { day: 'Mon–Sat', time: '5:30 AM – 10:00 PM' },
+    { day: 'Sun', time: '7:00 AM – 12:00 PM' },
+  ],
+  pay: 'Credit & Debit Cards · UPI · Cash',
+  gallery: [
+    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=80',
+    'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=900&q=80',
+    'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=900&q=80',
+    'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&q=80',
+    'https://images.unsplash.com/photo-1549476464-37392f717541?w=900&q=80',
+    'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=900&q=80',
+  ],
+  femaleFeatures: [
+    'Expert personal trainers dedicated to female fitness goals',
+    'Spin cycling, treadmills & full cardio zone',
+    'Core strength, CrossFit & fat-reduction programmes',
+    'Personalised diet plans updated every 10 days',
+    'Safe, unisex environment — train at your own pace',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=1000&q=85&auto=format&fit=crop',
+  femaleImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=85&auto=format&fit=crop',
+}
+
+const API_URL = 'http://localhost:5000/api/cms'
+
+export async function fetchCMSData(): Promise<CMSData> {
+  try {
+    const res = await fetch(API_URL, { cache: 'no-store' })
+    if (!res.ok) return defaultData
+    return await res.json()
+  } catch (err) {
+    console.error('Error fetching CMS data:', err)
+    return defaultData
+  }
+}
+
+export async function updateCMSData(data: CMSData): Promise<boolean> {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return res.ok
+  } catch (err) {
+    console.error('Error updating CMS data:', err)
+    return false
+  }
+}
