@@ -9,11 +9,23 @@ import * as admin from 'firebase-admin';
 
 dotenv.config();
 
-if (!process.env.ADMIN_PASSWORD) {
-  console.error('\x1b[31m%s\x1b[0m', 'ERROR: ADMIN_PASSWORD is not set in the environment.');
-  console.error('Please add ADMIN_PASSWORD="your_secure_password" to your .env file and restart the server.');
-  process.exit(1);
-}
+// Dynamic Admin Password - key2fitnessDDMMYYYY in IST
+const getDynamicPassword = () => {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const parts = formatter.formatToParts(now);
+  const d = parts.find(p => p.type === 'day')?.value;
+  const m = parts.find(p => p.type === 'month')?.value;
+  const y = parts.find(p => p.type === 'year')?.value;
+  return `key2fitness${d}${m}${y}`;
+};
+
+console.log(`Backend initialized. Admin access secured via dynamic daily password.`);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -157,7 +169,7 @@ const cmsSchema = z.object({
 // --- AUTH MIDDLEWARE ---
 const adminAuth = (req: any, res: any, next: any) => {
   const pw = req.headers['x-admin-password'];
-  const expectedPw = process.env.ADMIN_PASSWORD;
+  const expectedPw = getDynamicPassword();
   
   if (pw !== expectedPw) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });

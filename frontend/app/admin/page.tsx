@@ -4,7 +4,20 @@ import { fetchCMSData, updateCMSData, defaultData, CMSData } from '@/lib/cms-dat
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import BrandLogo from '@/components/BrandLogo'
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'key2fit2026'
+const getDynamicPassword = () => {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const parts = formatter.formatToParts(now);
+  const d = parts.find(p => p.type === 'day')?.value;
+  const m = parts.find(p => p.type === 'month')?.value;
+  const y = parts.find(p => p.type === 'year')?.value;
+  return `key2fitness${d}${m}${y}`;
+};
 
 type Tab = 'hero' | 'female' | 'training' | 'prices' | 'contact' | 'gallery'
 
@@ -77,7 +90,7 @@ export default function AdminPage() {
   }
 
   const login = () => {
-    if (pw === ADMIN_PASSWORD) { setAuthed(true); setError('') }
+    if (pw === getDynamicPassword()) { setAuthed(true); setError('') }
     else {
       setShake(true); setError('Incorrect password.')
       setPw(''); setTimeout(() => setShake(false), 500)
