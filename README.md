@@ -45,7 +45,7 @@ npm start
 
 Visit `/admin` (e.g. `https://yourdomain.com/admin`)
 
-**Password:** `key2fit2026`
+**Password:** Dynamic (changes daily)
 
 ### What the coach can edit:
 | Section | Fields |
@@ -102,13 +102,10 @@ lib/
 
 ---
 
-## Change Admin Password
+## Dynamic Admin Password
 
-Open `app/admin/page.tsx` → find line:
-```ts
-const CMS_PW = 'key2fit2026'
-```
-Change to your new password → save → redeploy.
+The admin dashboard now uses a dynamic password that changes daily based on the date.
+Format: `key2fitnessDDMMYYYY` (e.g., `key2fitness28032026` for March 28, 2026).
 
 ---
 
