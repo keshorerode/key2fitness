@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   title: 'The Key 2 Fitness Unisex Gym',
   description: 'The Key 2 Fitness — Unisex gym in Erode, Tamil Nadu. Personal training, CrossFit, fat reduction and more.',
   keywords: 'gym, fitness, Erode, unisex gym, personal training, CrossFit, Tamil Nadu',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
