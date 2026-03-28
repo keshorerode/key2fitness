@@ -102,11 +102,4 @@ lib/
 
 ---
 
-## Dynamic Admin Password
-
-The admin dashboard now uses a dynamic password that changes daily based on the date.
-Format: `key2fitnessDDMMYYYY` (e.g., `key2fitness28032026` for March 28, 2026).
-
----
-
 Built with ❤️ for The Key 2 Fitness, Erode.
