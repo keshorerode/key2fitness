@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import https from 'https';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
@@ -261,6 +262,20 @@ app.post('/api/cms', adminAuth, async (req, res) => {
   }
 });
 
+app.get('/ping', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
+
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
+
+  const RENDER_URL = 'https://key2fitness-backend.onrender.com/ping';
+
+  setInterval(() => {
+    https.get(RENDER_URL, (res) => {
+      console.log(`Keep-alive ping: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('Keep-alive failed:', err.message);
+    });
+  }, 10 * 60 * 1000);
 });
