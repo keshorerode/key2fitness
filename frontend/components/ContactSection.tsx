@@ -87,7 +87,7 @@ export default function ContactSection({ data }: { data: CMSData }) {
               {data.openingHours?.map((slot, i) => (
                 <div key={i}>
                   <div style={{ fontFamily: 'var(--font-barlow-condensed)', fontSize: '0.85rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-                    {slot.day}
+                    {slot.day}{slot.session ? ` · ${slot.session}` : ''}
                   </div>
                   <div style={{ fontFamily: 'var(--font-bebas)', fontSize: '1.6rem', color: 'var(--tan)', lineHeight: 1 }}>
                     {slot.time}
@@ -126,7 +126,7 @@ export default function ContactSection({ data }: { data: CMSData }) {
             <iframe
               src={loc?.mapUrl}
               width="100%" height="340"
-              style={{ filter: 'grayscale(1) invert(0.9) contrast(1.1)', display: 'block', border: 0 }}
+              style={{ display: 'block', border: 0 }}
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
             />
             <div style={{

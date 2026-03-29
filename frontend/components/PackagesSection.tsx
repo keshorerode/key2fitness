@@ -52,7 +52,7 @@ function PriceCard({ plan, data, index, inView }: {
   plan: CMSData['membershipPlans'][0]; data: CMSData; index: number; inView: boolean
 }) {
   const [hovered, setHovered] = useState(false)
-  const isFeatured = plan.id === data.pFeatured
+  const isFeatured = Array.isArray(data.pFeatured) ? data.pFeatured.includes(plan.id) : data.pFeatured === plan.id;
 
   return (
     <motion.div

@@ -18,12 +18,12 @@ export interface CMSData {
   training: TrainingCard[]
   // Prices
   membershipPlans: { duration: string; label: string; price: string; id: string }[]
-  pFeatured: string
+  pFeatured: string[]
   ptPackages: { id: string; title: string; subtitle: string; price: string; features: string[] }[]
   // Contact
   locations: { id: string; address: string; mapUrl: string }[]
   ph: string; pay: string
-  openingHours: { day: string; time: string }[]
+  openingHours: { day: string; session?: string; time: string }[]
   // Gallery
   gallery: string[]
   // Dynamic Features & Images
@@ -64,7 +64,7 @@ export const defaultData: CMSData = {
     { id: 'p4', duration: '13 Months', label: 'annual',     price: '₹8,000' },
     { id: 'p5', duration: '24 Months', label: '2 years',    price: '₹11,000' },
   ],
-  pFeatured: 'p4',
+  pFeatured: ['p4'],
   ptPackages: [
     {
       id: 'pt1',

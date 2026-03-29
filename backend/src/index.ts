@@ -87,7 +87,7 @@ const defaultData = {
     { id: 'p4', duration: '13 Months', label: 'annual',     price: '₹8,000' },
     { id: 'p5', duration: '24 Months', label: '2 years',    price: '₹11,000' },
   ],
-  pFeatured: 'p4',
+  pFeatured: ['p4'],
   ptPackages: [
     {
       id: 'pt1', title: 'Personal Training', subtitle: 'One-on-one coaching · Dedicated trainer', price: '₹7,000',
@@ -149,7 +149,7 @@ const cmsSchema = z.object({
   femaleStats: z.array(z.object({ num: z.string(), label: z.string() })).optional(),
   training: z.array(trainingCardSchema).optional(),
   membershipPlans: z.array(z.object({ duration: z.string(), label: z.string(), price: z.string(), id: z.string() })).optional(),
-  pFeatured: z.string().optional(),
+  pFeatured: z.array(z.string()).optional(),
   ptPackages: z.array(z.object({
     id: z.string(),
     title: z.string(),
@@ -160,7 +160,7 @@ const cmsSchema = z.object({
   locations: z.array(z.object({ id: z.string(), address: z.string(), mapUrl: z.string() })).optional(),
   ph: z.string().optional(),
   pay: z.string().optional(),
-  openingHours: z.array(z.object({ day: z.string(), time: z.string() })).optional(),
+  openingHours: z.array(z.object({ day: z.string(), session: z.string().optional(), time: z.string() })).optional(),
   gallery: z.array(z.string()).optional(),
   femaleFeatures: z.array(z.string()).optional(),
   heroImage: z.string().optional(),
@@ -215,6 +215,11 @@ app.post('/api/cms', adminAuth, async (req, res) => {
   // 1. Explicitly reject arrays and null
   if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
     return res.status(400).json({ success: false, error: 'Invalid data format (must be an object)' });
+  }
+
+  // Legacy data migration: convert pFeatured string to array
+  if (typeof req.body.pFeatured === 'string') {
+    req.body.pFeatured = [req.body.pFeatured];
   }
 
   // 2. Validate with Zod

@@ -223,7 +223,7 @@ export default function AdminPage() {
 
   const addOpeningHour = () => {
     pushToHistory(data)
-    setData(prev => ({ ...prev, openingHours: [...(prev.openingHours || []), { day: 'New Day', time: '00:00 - 00:00' }] }))
+    setData(prev => ({ ...prev, openingHours: [...(prev.openingHours || []), { day: 'New Day', session: 'Morning', time: '00:00 - 00:00' }] }))
   }
 
   const deleteOpeningHour = (i: number) => {
@@ -233,7 +233,7 @@ export default function AdminPage() {
     setData(prev => ({ ...prev, openingHours: h }))
   }
 
-  const updateOpeningHour = (i: number, field: 'day' | 'time', val: string) => {
+  const updateOpeningHour = (i: number, field: 'day' | 'session' | 'time', val: string) => {
     pushToHistory(data)
     const h = [...data.openingHours]
     h[i] = { ...h[i], [field]: val }
@@ -612,7 +612,7 @@ export default function AdminPage() {
                   <GroupLabel>Membership Plans</GroupLabel>
                   <div className="admin-grid-1" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
                     {data.membershipPlans?.map((p, i) => {
-                      const isFeatured = data.pFeatured === p.id
+                      const isFeatured = Array.isArray(data.pFeatured) ? data.pFeatured.includes(p.id) : data.pFeatured === p.id
                       return (
                         <div key={p.id} style={{
                           position: 'relative',
@@ -624,7 +624,14 @@ export default function AdminPage() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: 12 }}>
                               <button 
-                                onClick={() => update('pFeatured', p.id)}
+                                onClick={() => {
+                                  const current = Array.isArray(data.pFeatured) ? data.pFeatured : (data.pFeatured ? [data.pFeatured] : []);
+                                  if (current.includes(p.id)) {
+                                    update('pFeatured', current.filter(id => id !== p.id) as any)
+                                  } else {
+                                    update('pFeatured', [...current, p.id] as any)
+                                  }
+                                }}
                                 style={{
                                   background: isFeatured ? 'var(--tan)' : 'var(--dark)',
                                   color: isFeatured ? 'var(--black)' : 'var(--muted)',
@@ -748,7 +755,11 @@ export default function AdminPage() {
                           <label style={{ display: 'block', fontSize: '0.6rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 4 }}>Day (e.g. Mon–Sat)</label>
                           <CInput value={slot.day} onChange={v => updateOpeningHour(i, 'day', v)} />
                         </div>
-                        <div style={{ flex: 2 }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '0.6rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 4 }}>Session</label>
+                          <CInput value={slot.session || ''} onChange={v => updateOpeningHour(i, 'session', v)} />
+                        </div>
+                        <div style={{ flex: 1.5 }}>
                           <label style={{ display: 'block', fontSize: '0.6rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 4 }}>Time (e.g. 5:00 AM – 9:00 PM)</label>
                           <CInput value={slot.time} onChange={v => updateOpeningHour(i, 'time', v)} />
                         </div>
