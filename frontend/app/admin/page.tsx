@@ -308,6 +308,13 @@ export default function AdminPage() {
     setData(prev => ({ ...prev, ptPackages: p }))
   }
 
+  const updatePTFeatureOrder = (pkgIndex: number, newOrder: string[]) => {
+    pushToHistory(data)
+    const p = [...data.ptPackages]
+    p[pkgIndex] = { ...p[pkgIndex], features: newOrder }
+    setData(prev => ({ ...prev, ptPackages: p }))
+  }
+
   const handleSave = async () => {
     setSaveFlash(true)
     const success = await updateCMSData(data, pw)
@@ -699,12 +706,12 @@ export default function AdminPage() {
                         </Grid>
                         
                         <label style={{ display: 'block', fontSize: '0.62rem', color: 'var(--tan)', textTransform: 'uppercase', marginBottom: 10, marginTop: 10 }}>Package Features</label>
-                        {pkg.features?.map((f, fi) => (
-                          <div key={fi} style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                            <CInput value={f} onChange={v => updatePTFeature(i, fi, v)} style={{ fontSize: '0.75rem', padding: '6px 10px' }} />
-                            <button onClick={() => deletePTFeature(i, fi)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>✕</button>
-                          </div>
-                        ))}
+                        <PTFeatureList 
+                          features={pkg.features || []}
+                          onChange={(newFeatures) => updatePTFeatureOrder(i, newFeatures)}
+                          onUpdate={(fi, val) => updatePTFeature(i, fi, val)}
+                          onDelete={(fi) => deletePTFeature(i, fi)}
+                        />
                         <button onClick={() => addPTFeature(i)} style={{ background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', width: '100%', padding: 8, fontSize: '0.7rem', cursor: 'pointer', marginTop: 6, fontFamily: 'var(--font-barlow-condensed)' }}>
                           + ADD FEATURE
                         </button>
@@ -1096,6 +1103,71 @@ function MobileFocusOverlay({ field, onClose }: {
         </button>
       </motion.div>
     </motion.div>
+  )
+}
+
+function PTFeatureList({
+  features,
+  onChange,
+  onUpdate,
+  onDelete
+}: {
+  features: string[]
+  onChange: (features: string[]) => void
+  onUpdate: (index: number, val: string) => void
+  onDelete: (index: number) => void
+}) {
+  const [items, setItems] = useState<{ id: string; text: string }[]>(() =>
+    features.map((f) => ({ id: Math.random().toString(), text: f }))
+  )
+
+  useEffect(() => {
+    if (JSON.stringify(features) !== JSON.stringify(items.map((i) => i.text))) {
+      const availableItems = [...items]
+      setItems(
+        features.map((f) => {
+          const foundIdx = availableItems.findIndex((i) => i.text === f)
+          if (foundIdx !== -1) {
+            const foundItem = availableItems[foundIdx]
+            availableItems.splice(foundIdx, 1)
+            return foundItem
+          }
+          return { id: Math.random().toString(), text: f }
+        })
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [features])
+
+  return (
+    <Reorder.Group axis="y" values={items} onReorder={(newItems) => {
+      setItems(newItems)
+      onChange(newItems.map(i => i.text))
+    }} style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+      {items.map((item, index) => (
+        <Reorder.Item key={item.id} value={item} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <div style={{ color: 'var(--muted)', fontSize: '1rem', userSelect: 'none', cursor: 'grab', display: 'flex' }}>⠿</div>
+          <CInput
+            value={item.text}
+            onChange={(v) => {
+              const newItems = [...items]
+              newItems[index].text = v
+              setItems(newItems)
+              onUpdate(index, v)
+            }}
+            style={{ fontSize: '0.75rem', padding: '6px 10px', flex: 1 }}
+          />
+          <button
+            onClick={() => onDelete(index)}
+            style={{ background: 'none', border: 'none', color: 'var(--muted)', padding: '0 6px', fontSize: '1rem', cursor: 'pointer', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c0392b')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+          >
+            ✕
+          </button>
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
   )
 }
 
