@@ -23,7 +23,7 @@ export default function Home() {
     load()
   }, [])
 
-  if (loading) return null // Hide while loading to prevent flicker
+  // Render immediately using default data, will update seamlessly when API responds
 
   return (
     <main>
