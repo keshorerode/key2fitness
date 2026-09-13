@@ -1,12 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { z } from 'zod';
-import * as admin from 'firebase-admin';
 
 dotenv.config();
 
@@ -31,25 +29,6 @@ console.log(`Backend initialized. Admin access secured via dynamic daily passwor
 const app = express();
 const PORT = process.env.PORT || 5000;
 const DATA_FILE = path.join(__dirname, '../cms-data.json');
-
-// Initialize Firebase Admin
-// Requires GOOGLE_APPLICATION_CREDENTIALS env var or service account JSON
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.applicationDefault()
-    });
-    console.log('Firebase Admin initialized successfully');
-  } catch (err) {
-    console.error('Firebase Admin init error:', err);
-  }
-} else {
-  console.warn('GOOGLE_APPLICATION_CREDENTIALS not set. Firebase Admin not initialized.');
-}
-
-const db = admin.apps.length ? admin.firestore() : null;
-const CMS_COLLECTION = 'site_data';
-const CMS_DOC = 'cms';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -184,34 +163,20 @@ function ensureFile() {
   }
 }
 
-app.get('/api/cms', async (req, res) => {
-  if (!db) {
-    // Fallback to local file if Firebase is not configured
-    try {
-      ensureFile();
-      const raw = fs.readFileSync(DATA_FILE, 'utf8');
-      return res.json(JSON.parse(raw));
-    } catch (err: any) {
-      console.error('Failed to read or parse cms-data.json:', err);
-      return res.status(500).json({ success: false, error: 'Failed to read or parse cms-data.json' });
-    }
-  }
+// --- ROUTES ---
 
+app.get('/api/cms', (req, res) => {
   try {
-    const doc = await db.collection(CMS_COLLECTION).doc(CMS_DOC).get();
-    if (!doc.exists) {
-      // If no data in Firestore, seeds it with defaultData
-      await db.collection(CMS_COLLECTION).doc(CMS_DOC).set(defaultData);
-      return res.json(defaultData);
-    }
-    res.json(doc.data());
-  } catch (err) {
-    console.error('Error fetching from Firestore:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch CMS data' });
+    ensureFile();
+    const raw = fs.readFileSync(DATA_FILE, 'utf8');
+    res.json(JSON.parse(raw));
+  } catch (err: any) {
+    console.error('Failed to read or parse cms-data.json:', err);
+    res.status(500).json({ success: false, error: 'Failed to read CMS data' });
   }
 });
 
-app.post('/api/cms', adminAuth, async (req, res) => {
+app.post('/api/cms', adminAuth, (req, res) => {
   // 1. Explicitly reject arrays and null
   if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
     return res.status(400).json({ success: false, error: 'Invalid data format (must be an object)' });
@@ -228,42 +193,31 @@ app.post('/api/cms', adminAuth, async (req, res) => {
     return res.status(400).json({ success: false, error: 'Validation failed', details: validated.error.format() });
   }
 
-  if (!db) {
-    // Fallback to local file if Firebase is not configured
-    try {
-      ensureFile();
-      let existing = {};
-      try {
-        const raw = fs.readFileSync(DATA_FILE, 'utf8');
-        existing = JSON.parse(raw);
-      } catch (parseErr) {
-        const corruptPath = DATA_FILE + '.corrupt.' + Date.now();
-        fs.copyFileSync(DATA_FILE, corruptPath);
-        console.error(`CRITICAL: Existing CMS data is corrupt. Backup created at: ${corruptPath}. Parse error:`, parseErr);
-        return res.status(500).json({ success: false, error: 'Local data file is corrupt and could not be parsed safely' });
-      }
-      
-      const updated = { ...existing, ...validated.data };
-      const tempPath = DATA_FILE + '.tmp';
-      
-      // Atomic write: Write to temp file then rename
-      fs.writeFileSync(tempPath, JSON.stringify(updated, null, 2));
-      fs.renameSync(tempPath, DATA_FILE);
-      
-      return res.json({ success: true });
-    } catch (err: any) {
-      console.error('Atomic write to local storage failed:', err);
-      return res.status(500).json({ success: false, error: 'Failed to save to local storage', details: err.message });
-    }
-  }
-
+  // 3. Read existing, merge, and write atomically
   try {
-    // 3. Merge with existing data in Firestore
-    await db.collection(CMS_COLLECTION).doc(CMS_DOC).set(validated.data, { merge: true });
+    ensureFile();
+    let existing = {};
+    try {
+      const raw = fs.readFileSync(DATA_FILE, 'utf8');
+      existing = JSON.parse(raw);
+    } catch (parseErr) {
+      const corruptPath = DATA_FILE + '.corrupt.' + Date.now();
+      fs.copyFileSync(DATA_FILE, corruptPath);
+      console.error(`CRITICAL: Existing CMS data is corrupt. Backup created at: ${corruptPath}. Parse error:`, parseErr);
+      return res.status(500).json({ success: false, error: 'Local data file is corrupt and could not be parsed safely' });
+    }
+    
+    const updated = { ...existing, ...validated.data };
+    const tempPath = DATA_FILE + '.tmp';
+    
+    // Atomic write: Write to temp file then rename
+    fs.writeFileSync(tempPath, JSON.stringify(updated, null, 2));
+    fs.renameSync(tempPath, DATA_FILE);
+    
     res.json({ success: true });
-  } catch (err) {
-    console.error('Error saving to Firestore:', err);
-    res.status(500).json({ success: false, error: 'Failed to save CMS data' });
+  } catch (err: any) {
+    console.error('Atomic write to local storage failed:', err);
+    res.status(500).json({ success: false, error: 'Failed to save CMS data', details: err.message });
   }
 });
 
@@ -273,14 +227,4 @@ app.get('/ping', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
-
-  const RENDER_URL = 'https://key2fitness-backend.onrender.com/ping';
-
-  setInterval(() => {
-    https.get(RENDER_URL, (res) => {
-      console.log(`Keep-alive ping: ${res.statusCode}`);
-    }).on('error', (err) => {
-      console.error('Keep-alive failed:', err.message);
-    });
-  }, 10 * 60 * 1000);
 });

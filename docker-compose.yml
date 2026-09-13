@@ -1,0 +1,31 @@
+services:
+  # ─── Backend (Express API) ───
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+    volumes:
+      # Persist CMS data across container restarts
+      - cms-data:/app/data
+    restart: unless-stopped
+
+  # ─── Frontend (Next.js) ───
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # The frontend talks to the backend via this URL at build time
+        NEXT_PUBLIC_API_URL: http://backend:5000/api/cms
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  cms-data:

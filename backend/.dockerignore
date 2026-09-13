@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+firebase-adminsdk.json
+*.md
+.git
+.gitignore
