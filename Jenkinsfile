@@ -2,17 +2,10 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Pull latest code from GitHub
-                checkout scm
-            }
-        }
-
         stage('Build Docker Images') {
             steps {
                 echo '🔨 Building Docker images...'
-                sh 'docker compose build --no-cache'
+                sh 'COMPOSE_PARALLEL_LIMIT=1 docker compose build'
             }
         }
 
@@ -40,16 +33,12 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo '🏥 Running health checks...'
-                // Wait for containers to start
-                sh 'sleep 10'
-                // Check backend
-                sh 'curl -f http://localhost:5000/ping || exit 1'
-                // Check frontend
-                sh 'curl -f http://localhost:3000 || exit 1'
+                // Retry for up to ~60s while containers start
+                sh 'curl -f --retry 12 --retry-delay 5 --retry-connrefused http://localhost:5000/ping'
+                sh 'curl -f --retry 12 --retry-delay 5 --retry-connrefused http://localhost:3000'
                 echo '✅ All services are healthy!'
             }
         }
-
     }
 
     post {
