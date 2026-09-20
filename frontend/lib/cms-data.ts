@@ -125,7 +125,10 @@ export const defaultData: CMSData = {
   femaleImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=85&auto=format&fit=crop',
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/cms'
+const API_URL =
+  typeof window === 'undefined'
+    ? 'http://backend:5000/api/cms' // server-side: inside Docker
+    : '/api/cms'                    // browser: same origin, proxied by Next.js
 
 export async function fetchCMSData(): Promise<CMSData> {
   try {

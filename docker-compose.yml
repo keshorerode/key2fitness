@@ -19,9 +19,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        # The frontend talks to the backend via this URL at build time
-        NEXT_PUBLIC_API_URL: http://backend:5000/api/cms
     ports:
       - "3000:3000"
     depends_on:
